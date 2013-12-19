@@ -967,6 +967,7 @@ HWND InitInstance(HINSTANCE hInstance,LPSTR pszCmdLine,int nCmdShow)
 
       if (flagMatchText & 2) {
         if (!flagJumpTo)
+
           EditJumpTo(hwndEdit,-1,0);
         EditFindPrev(hwndEdit,&efrData,FALSE);
         EditEnsureSelectionVisible(hwndEdit);
@@ -1004,6 +1005,11 @@ HWND InitInstance(HINSTANCE hInstance,LPSTR pszCmdLine,int nCmdShow)
     else if (iInitialLexer >=0 && iInitialLexer < NUMLEXERS)
       Style_SetLexerFromID(hwndEdit,iInitialLexer);
     flagLexerSpecified = 0;
+  }
+
+  if (flagJumpTo) { // Jump to position
+	  EditJumpTo(hwndEdit,iInitialLine,iInitialColumn);
+	  EditEnsureSelectionVisible(hwndEdit);
   }
 
   // If start as tray icon, set current filename as tooltip
@@ -5515,6 +5521,13 @@ void LoadSettings()
   else
     PathAbsoluteFromApp(tchFavoritesDir,NULL,COUNTOF(tchFavoritesDir),TRUE);
 
+  flagJumpTo = IniSectionGetInt(pIniSection,L"OpenFileAtBottom",0);
+  if (flagJumpTo) {
+		flagJumpTo = 1;
+		iInitialLine = -1;
+  }
+
+
   iPathNameFormat = IniSectionGetInt(pIniSection,L"PathNameFormat",0);
   iPathNameFormat = max(min(iPathNameFormat,2),0);
 
@@ -5819,6 +5832,7 @@ void SaveSettings(BOOL bSaveSettingsNow)
   IniSectionSetInt(pIniSection,L"CloseFind",efrData.bFindClose);
   IniSectionSetInt(pIniSection,L"CloseReplace",efrData.bReplaceClose);
   IniSectionSetInt(pIniSection,L"NoFindWrap",efrData.bNoFindWrap);
+  IniSectionSetInt(pIniSection,L"OpenFileAtBottom", flagJumpTo);
   PathRelativeToApp(tchOpenWithDir,wchTmp,COUNTOF(wchTmp),FALSE,TRUE,flagPortableMyDocs);
   IniSectionSetString(pIniSection,L"OpenWithDir",wchTmp);
   PathRelativeToApp(tchFavoritesDir,wchTmp,COUNTOF(wchTmp),FALSE,TRUE,flagPortableMyDocs);
